@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+    postgres:
+        image: postgres:13.5
+        container_name: payment-db-dev
+        restart: unless-stopped
+        environment:
+            POSTGRES_USER: 'nghia'
+            POSTGRES_PASSWORD: 'nghia1234'
+            POSTGRES_DB: 'payment-db-dev'
+        volumes:
+            - ./postgresdata:/data/db
+        ports:
+            - '5432:5432'

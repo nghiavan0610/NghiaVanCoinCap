@@ -1,0 +1,148 @@
+// // This is your Prisma schema file,
+// // learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// model Currency {
+//   id           String   @id @default(uuid())
+//   name         String
+//   abbreviation String
+//   createdAt    DateTime @default(now())
+//   updatedAt    DateTime @updatedAt
+// }
+
+// model Market {
+//   id          String   @id @default(uuid())
+//   name        String
+//   baseSymbol  String
+//   quoteSymbol String
+//   price       Float
+//   change      Float
+//   volume      Float
+//   Cap         Float
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+// }
+
+model User {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  password     String
+  fullname     String
+  email        String?
+  phone        String?
+  role         Role      @default(User)
+  birthday     DateTime?
+  gender       Gender    @default(None)
+  about        String?
+  avatar       String?
+  refreshToken String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  // slug         String?   @unique
+  // slug String @unique @default(dbgenerated("lower(makeUniqueSlug(name, 1)))"))
+  // wallets   Wallet[]
+  // orders    Order[]
+  // buyerTrades  Trade[]   @relation("Buyer")
+  // sellerTrades Trade[]   @relation("Seller")
+}
+
+enum Role {
+  User
+  Admin
+}
+
+enum Gender {
+  None
+  Male
+  Female
+  Other
+}
+
+// model Currency {
+//   id           String   @id @default(uuid())
+//   name         String
+//   abbreviation String
+//   createdAt    DateTime @default(now())
+//   updatedAt    DateTime @updatedAt
+//   wallets      Wallet[]
+// }
+
+// model Wallet {
+//   id           String        @id @default(uuid())
+//   balance      Float
+//   createdAt    DateTime      @default(now())
+//   updatedAt    DateTime      @updatedAt
+//   userId       String
+//   user         User          @relation(fields: [userId], references: [id])
+//   currencyId   String
+//   currency     Currency      @relation(fields: [currencyId], references: [id])
+//   orders       Order[]
+//   transactions Transaction[]
+// }
+
+// // model Trade {
+// //   id         String    @id @default(uuid())
+// //   type       String
+// //   price      Float
+// //   amount     Float
+// //   createdAt  DateTime  @default(now())
+// //   marketId   String
+// //   market     Market    @relation(fields: [marketId], references: [id])
+// //   buyerId    String
+// //   buyer      User      @relation("Buyer", fields: [buyerId], references: [id])
+// //   sellerId   String
+// //   seller     User      @relation("Seller", fields: [sellerId], references: [id])
+// //   Currency   Currency? @relation(fields: [currencyId], references: [id])
+// //   currencyId String?
+// // }
+
+// model Transaction {
+//   id       String  @id @default(uuid())
+//   type     String
+//   amount   String
+//   orderId  String
+//   orders   Order[]
+//   walletId String
+//   wallet   Wallet  @relation(fields: [walletId], references: [id])
+// }
+
+// model Order {
+//   id            String      @id @default(uuid())
+//   type          String
+//   price         Float
+//   amount        Float
+//   status        String
+//   // filledAmount Float
+//   createdAt     DateTime    @default(now())
+//   updatedAt     DateTime    @updatedAt
+//   srcWalletId   String
+//   srcWallet     Wallet      @relation("SrcWallet", fields: [walletId], references: [id])
+//   destWalletId  String
+//   destWallet    Wallet      @relation("DestWallet", fields: [walletId], references: [id])
+//   marketId      String
+//   market        Market      @relation(fields: [marketId], references: [id])
+//   transactionId String
+//   transaction   Transaction @relation(fields: [transactionId], references: [id])
+//   // userId       String
+//   // user         User     @relation(fields: [userId], references: [id])
+//   User          User?       @relation(fields: [userId], references: [id])
+//   userId        String?
+// }
+
+// model Market {
+//   id          String   @id @default(uuid())
+//   name        String
+//   baseSymbol  String
+//   quoteSymbol String
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+//   orders      Order[]
+//   trades      Trade[]
+// }
