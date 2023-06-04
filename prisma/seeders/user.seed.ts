@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'argon2';
-// import { hashSync } from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -13,6 +12,7 @@ const seedUsers = async () => {
                 fullname: i === 0 ? 'admin' : `user${i + 1}`,
                 email: i === 0 ? 'admin@gmail.com' : `user${i + 1}@gmail.com`,
                 password: i === 0 ? await hash('p@ssword') : await hash(`user${i + 1}password`),
+                cash: Math.random() < 0.5 ? Math.floor(Math.random() * (999999 - 1 + 1) + 1) : 0,
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 role: i === 0 ? 'Admin' : 'User',
