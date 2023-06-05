@@ -21,7 +21,7 @@ export class CoinsSchedule implements OnModuleInit {
             const { id, userId, coinId, type, price, amount } = transaction;
 
             const realTimePrice = await this.coinsService.getRealTimePrice(coinId);
-            console.log(realTimePrice);
+            console.log(`${coinId}: ${realTimePrice}`);
             if ((type === 'bid' && realTimePrice <= price) || (type === 'ask' && realTimePrice >= price)) {
                 console.log('execute');
                 const executeTransactionDto: ExecuteTransactionDto = {

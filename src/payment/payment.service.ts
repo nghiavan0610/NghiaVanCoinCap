@@ -14,7 +14,7 @@ export class PaymentService {
     }
 
     async getOrders(id: string): Promise<Order[]> {
-        const orders = await this.prisma.order.findMany({ where: { userId: id } });
+        const orders = await this.prisma.order.findMany({ where: { userId: id }, orderBy: { createdAt: 'desc' } });
         return orders;
     }
 
@@ -47,7 +47,6 @@ export class PaymentService {
     async checkOut(id: string, cashDto: CashDto): Promise<string> {
         try {
             const customer = await this.stripe.customers.create({
-                email: 'nghiavan.dev@gmail.com',
                 metadata: {
                     userId: id,
                     product: 'Pay your deposit',

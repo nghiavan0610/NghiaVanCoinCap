@@ -60,6 +60,7 @@ model Transaction {
   type      String
   price     Float
   amount    Float
+  status    String   @default("pending")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

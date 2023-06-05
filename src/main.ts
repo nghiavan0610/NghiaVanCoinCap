@@ -5,7 +5,7 @@ import { ErrorHandler } from './exception-handler/exception-handler.filter';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
-import { join } from 'path';
+// import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import rawBodyMiddleware from './payment/middlewares/rawBody.middleware';
 

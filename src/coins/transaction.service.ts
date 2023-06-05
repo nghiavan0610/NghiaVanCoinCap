@@ -2,18 +2,26 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
 import { CreateTransactionDto } from './dto/createTransaction.dto';
-import { TransactionData } from './interfaces/transaction.interface';
 import { ExecuteTransactionDto } from './dto/executeTransaction.dto';
+import { Transaction } from '@prisma/client';
 
 @Injectable()
 export class TransactionService {
     constructor(private prisma: PrismaService, private usersService: UsersService) {}
 
+    async getCoinTransactions(id: string, coinId: string): Promise<Transaction[]> {
+        const transactions = await this.prisma.transaction.findMany({
+            where: { coinId, userId: id },
+            orderBy: { createdAt: 'desc' },
+        });
+        return transactions;
+    }
+
     async createTransaction(
         id: string,
         coinId: string,
         createTransactionDto: CreateTransactionDto,
-    ): Promise<TransactionData> {
+    ): Promise<Transaction> {
         const transaction = await this.prisma.transaction.create({
             data: { userId: id, coinId, ...createTransactionDto },
             include: { user: { select: { id: true, username: true, fullname: true } } },
@@ -75,14 +83,16 @@ export class TransactionService {
                     throw new NotFoundException('Unknow transaction type');
             }
         } catch (err) {
-            await this.prisma.transaction.delete({ where: { id } });
+            // await this.prisma.transaction.delete({ where: { id } });
+            await this.prisma.transaction.update({ where: { id }, data: { status: 'cancel' } });
+
             throw err;
         }
 
-        await this.prisma.transaction.delete({ where: { id } });
+        await this.prisma.transaction.update({ where: { id }, data: { status: 'success' } });
     }
 
-    async getPendingTransactions(): Promise<any[]> {
-        return await this.prisma.transaction.findMany();
+    async getPendingTransactions(): Promise<Transaction[]> {
+        return await this.prisma.transaction.findMany({ where: { status: 'pending' } });
     }
 }

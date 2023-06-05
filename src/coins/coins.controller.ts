@@ -3,7 +3,7 @@ import { CoinsService } from './coins.service';
 import { ApiTags } from '@nestjs/swagger';
 import { GetCurrentUserId } from 'src/decorators/getCurrentUserId.decorator';
 import { CreateTransactionDto } from './dto/createTransaction.dto';
-import { TransactionPayload } from './interfaces/transaction.interface';
+import { SingTransactionPayload, TransactionsPayload } from './interfaces/transaction.interface';
 import { TransactionService } from './transaction.service';
 import { CoinsPayload, SingleCoinPayload } from './interfaces/coin.interface';
 
@@ -26,18 +26,28 @@ export class CoinsController {
         return { coin };
     }
 
-    @Post(':coinId/transaction')
+    @Post(':coinId/transactions/create')
     @HttpCode(HttpStatus.CREATED)
     async createTransaction(
         @GetCurrentUserId() id: string,
         @Param('coinId') coinId: string,
         @Body() createTransactionDto: CreateTransactionDto,
-    ): Promise<TransactionPayload> {
+    ): Promise<SingTransactionPayload> {
         const transaction = await this.transactionService.createTransaction(id, coinId, createTransactionDto);
         return { transaction };
     }
 
-    @Delete(':coinId/transaction/:transactionId')
+    @Get(':coinId/transactions')
+    @HttpCode(HttpStatus.OK)
+    async getCoinTransactions(
+        @GetCurrentUserId() id: string,
+        @Param('coinId') coinId: string,
+    ): Promise<TransactionsPayload> {
+        const transactions = await this.transactionService.getCoinTransactions(id, coinId);
+        return { transactions };
+    }
+
+    @Delete(':coinId/transactions/:transactionId')
     @HttpCode(HttpStatus.OK)
     async deleteTransaction(
         @GetCurrentUserId() id: string,
