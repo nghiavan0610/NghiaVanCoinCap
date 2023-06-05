@@ -25,6 +25,10 @@ async function bootstrap() {
 
     app.use(rawBodyMiddleware());
 
+    app.useStaticAssets(join(__dirname, '..', 'public'));
+    app.setBaseViewsDir(join(__dirname, '..', 'resources/views'));
+    app.setViewEngine('hbs');
+
     // swagger
     const swaggerConfig = new DocumentBuilder()
         .setTitle('Crypto Currency Market Api')
