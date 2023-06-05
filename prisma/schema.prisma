@@ -45,25 +45,23 @@ enum Gender {
 model Wallet {
   id        String   @id @default(uuid())
   balance   Float    @default(0)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  coinId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  coinId String
 }
 
 model Transaction {
-  id String @id @default(uuid())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  coinId String
-  type   String
-  price  Float
-  amount Float
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  coinId    String
+  type      String
+  price     Float
+  amount    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model StripeEvent {
@@ -71,13 +69,15 @@ model StripeEvent {
 }
 
 model Order {
-  id              String @id @default(uuid())
+  id              String   @id @default(uuid())
   userId          String
-  user            User   @relation(fields: [userId], references: [id])
+  user            User     @relation(fields: [userId], references: [id])
   customerId      String
   paymentIntentId String
   product         String
   subTotal        Float
   total           Float
   paymentStatus   String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
