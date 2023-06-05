@@ -2,13 +2,13 @@ version: '3.8'
 services:
     postgres:
         image: postgres:13.5
-        container_name: payment-db-dev
+        container_name: nvcoincap-db-dev
         restart: unless-stopped
         environment:
             POSTGRES_USER: 'nghia'
             POSTGRES_PASSWORD: 'nghia1234'
-            POSTGRES_DB: 'payment-db-dev'
+            POSTGRES_DB: 'nvcoincap-db-dev'
         volumes:
-            - ./postgresdata:/data/db
+            - ./dev_data:/postgresdata
         ports:
             - '5432:5432'

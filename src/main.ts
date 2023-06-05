@@ -5,21 +5,25 @@ import { ErrorHandler } from './exception-handler/exception-handler.filter';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
-// import * as morgan from 'morgan';
+import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import rawBodyMiddleware from './payment/middlewares/rawBody.middleware';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule, { cors: true });
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true });
     // app.useLogger(new Logger());
     // app.use(morgan('combined'));
 
     app.use(helmet());
 
-    app.setGlobalPrefix(`api/v1`);
+    app.setGlobalPrefix(`api`);
 
     const config = app.get<ConfigService>(ConfigService);
 
     app.useGlobalPipes(new ValidationPipe());
     app.useGlobalFilters(new ErrorHandler(config));
+
+    app.use(rawBodyMiddleware());
 
     // swagger
     const swaggerConfig = new DocumentBuilder()
