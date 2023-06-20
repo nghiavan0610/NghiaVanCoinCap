@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
 import { CreateTransactionDto } from './dto/createTransaction.dto';
@@ -22,11 +22,33 @@ export class TransactionService {
         coinId: string,
         createTransactionDto: CreateTransactionDto,
     ): Promise<Transaction> {
-        const transaction = await this.prisma.transaction.create({
-            data: { userId: id, coinId, ...createTransactionDto },
-            include: { user: { select: { id: true, username: true, fullname: true } } },
-        });
-        return transaction;
+        try {
+            const { type, price, amount } = createTransactionDto;
+            const total = price * amount;
+            if (type === 'bid') {
+                const user = await this.prisma.user.findFirst({
+                    where: { id, cash: { gt: total } },
+                });
+
+                if (!user) throw new NotAcceptableException('Insufficient funds');
+            }
+
+            if (type === 'ask') {
+                const wallet = await this.prisma.wallet.findFirst({
+                    where: { userId: id, coinId, balance: { gt: amount } },
+                });
+
+                if (!wallet) throw new NotAcceptableException('Insufficient coins');
+            }
+
+            const transaction = await this.prisma.transaction.create({
+                data: { userId: id, coinId, ...createTransactionDto },
+                include: { user: { select: { id: true, username: true, fullname: true } } },
+            });
+            return transaction;
+        } catch (err) {
+            throw err;
+        }
     }
 
     async deleteTransaction(id: string, transactionId: string): Promise<boolean> {
@@ -44,52 +66,52 @@ export class TransactionService {
 
         const totalAmount = realTimePrice * amount;
 
-        try {
-            switch (type) {
-                case 'bid':
-                    if (user?.cash < totalAmount) throw new BadRequestException('Insufficient funds');
-
-                    await Promise.all([
-                        this.prisma.user.update({
-                            where: { id: userId },
-                            data: { cash: user.cash - totalAmount },
-                        }),
-                        wallet
-                            ? this.prisma.wallet.update({
-                                  where: { id: wallet.id },
-                                  data: { balance: wallet.balance + amount },
-                              })
-                            : this.prisma.wallet.create({
-                                  data: { userId, coinId, balance: amount },
-                              }),
-                    ]);
+        switch (type) {
+            case 'bid':
+                if (user?.cash < totalAmount) {
+                    await this.prisma.transaction.update({ where: { id }, data: { status: 'cancel' } });
                     break;
-                case 'ask':
-                    if (!wallet) throw new NotFoundException('Wallet was not found');
-                    if (wallet.balance < amount) throw new BadRequestException('Insufficient coins');
+                }
 
-                    await Promise.all([
-                        this.prisma.user.update({
-                            where: { id: userId },
-                            data: { cash: user.cash + totalAmount },
-                        }),
-                        this.prisma.wallet.update({
-                            where: { id: wallet.id },
-                            data: { balance: wallet.balance - amount },
-                        }),
-                    ]);
+                await Promise.all([
+                    this.prisma.user.update({
+                        where: { id: userId },
+                        data: { cash: user.cash - totalAmount },
+                    }),
+                    wallet
+                        ? this.prisma.wallet.update({
+                              where: { id: wallet.id },
+                              data: { balance: wallet.balance + amount },
+                          })
+                        : this.prisma.wallet.create({
+                              data: { userId, coinId, balance: amount },
+                          }),
+                ]);
+                await this.prisma.transaction.update({ where: { id }, data: { status: 'success' } });
+
+                break;
+            case 'ask':
+                if (!wallet || wallet.balance < amount) {
+                    await this.prisma.transaction.update({ where: { id }, data: { status: 'cancel' } });
                     break;
-                default:
-                    throw new NotFoundException('Unknow transaction type');
-            }
-        } catch (err) {
-            // await this.prisma.transaction.delete({ where: { id } });
-            await this.prisma.transaction.update({ where: { id }, data: { status: 'cancel' } });
+                }
 
-            throw err;
+                await Promise.all([
+                    this.prisma.user.update({
+                        where: { id: userId },
+                        data: { cash: user.cash + totalAmount },
+                    }),
+                    this.prisma.wallet.update({
+                        where: { id: wallet.id },
+                        data: { balance: wallet.balance - amount },
+                    }),
+                ]);
+                await this.prisma.transaction.update({ where: { id }, data: { status: 'success' } });
+
+                break;
+            default:
+                throw new NotFoundException('Unknow transaction type');
         }
-
-        await this.prisma.transaction.update({ where: { id }, data: { status: 'success' } });
     }
 
     async getPendingTransactions(): Promise<Transaction[]> {

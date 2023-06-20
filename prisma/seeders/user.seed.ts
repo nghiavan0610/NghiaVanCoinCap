@@ -12,7 +12,7 @@ const seedUsers = async () => {
                 fullname: i === 0 ? 'admin' : `user${i + 1}`,
                 email: i === 0 ? 'admin@gmail.com' : `user${i + 1}@gmail.com`,
                 password: i === 0 ? await hash('p@ssword') : await hash(`user${i + 1}password`),
-                cash: Math.random() < 0.5 ? Math.floor(Math.random() * (999999 - 1 + 1) + 1) : 0,
+                cash: Math.random() < 0.3 ? Math.floor(Math.random() * (9999999 - 999999 + 1) + 9999999) : 0,
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 role: i === 0 ? 'Admin' : 'User',
